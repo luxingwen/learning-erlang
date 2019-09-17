@@ -1,15 +1,28 @@
 ## 先安装openssl
 下载openssl源码
+
 $ wget http://www.openssl.org/source/openssl-1.0.2a.tar.gz
+
 $ tar -zxvf openssl-1.0.2a.tar.gz
+
 进入源码目录，注意如果不是最新下的目录，需要先执行 make clean 确保能够重新编译成功
 为了不和系统的openssl冲突，我们安装的时候需要指定安装的路径
+
+$ make clean
+
 $ ./configure --prefix=/usr/local/opt
+
 config之后，会生成Makefile，打开Makefile找到cc，在CFLAG参数列表里加上-fPIC
+
 CC= cc
+
 CFLAG= -fPIC -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -Wa,—noexecstack -m64 -DL_ENDIAN -DTERMIO -O3 -Wall -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DMD5_ASM -DAES_ASM -DVPAES_ASM -DBSAES_ASM -DWHIRLPOOL_ASM -DGHASH_ASM
+
 编译并安装
+
 $ sudo make && make install
+
+
 
 ## 安装Java
 
