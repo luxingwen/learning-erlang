@@ -158,7 +158,7 @@ idle_wait(accept_negotiate, _From, S = #state{other = OtherPid}) ->
 	{reply, ok, negotiate, S};
 
 idle_wait(Event, _From, State) ->
-	unexpected(Event, idle_wait),
+	unexpected(Event, idle_wait),678
 	{next_state, idle_wait, State}.
 
 %% 向物品列表中添加一件物品
