@@ -101,11 +101,9 @@ handle_overload_info(_, _Idx) ->
 
 is_empty(State = #state{kv_state = KvState, partition = Partition}) ->
     {IsEmpty, KvState1} = akv_kv_ets:is_empty(KvState),
-    lager:info("is_empty ~p:~p ", [Partition, IsEmpty]),
     {IsEmpty, State#state{kv_state = KvState1}}.
     
 delete(State=#state{kv_state=KvState, partition=Partition}) ->
-    lager:info("delete ~p", [Partition]),
     {ok, KvState1} = akv_kv_ets:dispose(KvState),
     {ok, KvState2} = akv_kv_ets:delete(KvState1),
     {ok, State#state{kv_state=KvState2}}.

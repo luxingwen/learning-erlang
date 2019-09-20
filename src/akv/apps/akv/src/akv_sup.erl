@@ -31,4 +31,4 @@ init(_Args) ->
     				 permanent, infinity, supervisor, [akv_coverage_fsm_sup]},
     { ok,
         { {one_for_one, 5, 10},
-          [VMaster, WriteFSMs]}}.
+          [VMaster, WriteFSMs, CoverageFSMs]}}.

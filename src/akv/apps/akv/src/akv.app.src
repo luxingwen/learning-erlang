@@ -9,6 +9,7 @@
                   stdlib,
                   sasl,
                   riak_core,
+                  cowboy,
                   setup
                  ]},
   {mod, { akv_app, []}},

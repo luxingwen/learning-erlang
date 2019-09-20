@@ -16,4 +16,4 @@ init([]) ->
 	CoverageFSM = {undefined, 
 					{akv_coverage_fsm, start_link, []},
 					temporary, 5000, worker, [akv_coverage_fsm]},
-	{ok, {{simple_one_for_one, 10, 10}}, [CoverageFSM]}.
+	{ok, {{simple_one_for_one, 10, 10}, [CoverageFSM]}}.
