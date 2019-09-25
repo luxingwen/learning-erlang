@@ -4,6 +4,8 @@
 
 -export([wait/1, signal/1]).
 
+-export([system_continue/3, system_terminate/4]).
+
 start_link(Name) ->
 	start_link(Name, []).
 
@@ -18,7 +20,8 @@ init(Parent, Name, DbgOpts) ->
 	process_flag(trap_exit, true),
 	Debug = sys:debug_options(DbgOpts),
 	proc_lib:init_ack({ok, self()}),
-	free(Name, Parent, Debug).
+	NewDebug = sys:handle_debug(Debug, fun debug/3, Name, init),
+	free(Name, Parent, NewDebug).
 
 
 wait(Name) ->
@@ -35,23 +38,54 @@ signal(Name) ->
 free(Name, Parent, Debug) ->
 	receive
 		{wait, Pid} ->
+			NewDebug = sys:handle_debug(Debug, fun debug/3, Name, {wait, Pid}),
 			Pid ! {self(), ok},
-			busy(Pid, Name, Parent, Debug);
+			busy(Pid, Name, Parent, NewDebug);
+		{system, From, Msg} ->
+			sys:handle_system_msg(Msg, From, Parent, ?MODULE, Debug, {free, Name});
 		stop ->
 			terminate(shutdown, Name);
 		{'EXIT', Parent, Reason} ->
 			terminate(Reason, Name)
 	end.
 
+
+
 busy(Pid, Name, Parent, Debug) ->
 	receive 
 		{signal, Pid} ->
-			free(Name, Parent, Debug);
+			NewDebug = sys:handle_debug(Debug, fun debug/3, Name, {signal, Pid}),
+			free(Name, Parent, NewDebug);
+		{system, From, Msg} ->
+			sys:handle_system_msg(Msg, From, Parent, ?MODULE, Debug, {busy, Name, Pid});
 		{'EXIT', Parent, Reason} ->
 			exit(Pid, Reason),
 			terminate(Reason, Name)
 	end.
 
+
+debug(Dev, Event, Name) ->
+	io:format(Dev, "mutex ~w: ~w~n", [Name, Event]).
+
+
+
+system_continue(Parent, Debug, {busy, Name, Pid}) ->
+	busy(Pid, Name, Parent, Debug);
+
+system_continue(Parent, Debug, {free, Name}) ->
+	free(Name, Parent, Debug).
+
+system_terminate(Reason, _Parent, Debug, {busy, Name, Pid}) ->
+	exit(Pid, Reason),
+	terminate(Reason, Name, Debug);
+
+system_terminate(Reason, _Parent, Debug, {fress, Name}) ->
+	terminate(Reason, Name, Debug).
+
+terminate(Reason, Name, Debug) ->
+	unregister(Name),
+	sys:handle_debug(Debug, fun debug/3, Name, {terminate, Reason}),
+	terminate(Reason).
 
 terminate(Reason, Name) ->
 	unregister(Name),
